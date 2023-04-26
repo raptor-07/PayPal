@@ -8,7 +8,7 @@ router
   .route("/:groupid")
   .get((req, res) => {
     console.log(req.params.groupid);
-    
+
     res.send("get details of the group");
   })
   .delete((req, res) => {
@@ -17,8 +17,6 @@ router
 router
   .route("/:groupid/transact")
   .post((req, res) => {
-    console.log(req.params.groupid);
-    
     res.send("add transaction to group");
   })
   .get((req, res) => {
@@ -27,5 +25,5 @@ router
   .delete((req, res) => {
     res.send("delete transaction from group");
   });
- 
+
 module.exports = router;

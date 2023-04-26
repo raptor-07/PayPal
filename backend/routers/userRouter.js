@@ -9,8 +9,8 @@ router.route("/:userid/user-home").get((req, res) => {
   res.send("get user details for home page");
 });
 router.route("/:userid/expense-data").get((req, res) => {
-    res.send("get expense details of user");
-  });
+  res.send("get expense details of user");
+});
 router
   .route("/:userid/:friendid")
   .post((req, res) => {
@@ -19,6 +19,5 @@ router
   .get((req, res) => {
     res.send("get user friends");
   });
-
 
 module.exports = router;
