@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
@@ -42,6 +43,13 @@ const userSchema = new mongoose.Schema(
 userSchema.pre(/^find/, function (next) {
   // exclude password and __v fields from all find queries
   this.select("-password -__v -createdAt -updatedAt -_id -email -username");
+  next();
+});
+userSchema.pre('save', async function (next) {
+  // only run this function if password was actually modified
+  if (!this.isModified('password')) return next();
+  // hash the password with cost of 12
+  this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
