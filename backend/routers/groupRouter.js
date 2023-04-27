@@ -1,29 +1,14 @@
 const express = require("express");
 const router = express.Router();
-
-router.route("/").post((req, res) => {
-  res.send("get all groups user is part of");
-});
+const groupController = require("../controllers/groupController");
 router
   .route("/:groupid")
-  .get((req, res) => {
-    console.log(req.params.groupid);
-
-    res.send("get details of the group");
-  })
-  .delete((req, res) => {
-    res.send("delete group");
-  });
+  .get(groupController.getGroupById)
+  .delete(groupController.deleteGroupById);
 router
   .route("/:groupid/transact")
-  .post((req, res) => {
-    res.send("add transaction to group");
-  })
-  .get((req, res) => {
-    res.send("get all transactions of group");
-  })
-  .delete((req, res) => {
-    res.send("delete transaction from group");
-  });
+  .post(groupController.addTransaction)
+  .get(groupController.getTransactions)
+  .delete(groupController.deleteTransaction);
 
 module.exports = router;
