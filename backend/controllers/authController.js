@@ -1,14 +1,15 @@
 const User = require("../models/userModel");
 const jwtSigner = require("../utils/jwtSigner");
-
+const createCookie = require("../utils/createCookie");
 const signup = async (req, res) => {
   const newUser = await new User(req.body).save();
   const data = await User.findById(newUser.id).lean();
   const token = jwtSigner.signToken(data);
+  createCookie(res, token);
   res.status(201).json({
     status: "success",
     data: {
-      token,
+      data
     },
   });
 };
