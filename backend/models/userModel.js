@@ -26,6 +26,7 @@ const userSchema = new mongoose.Schema(
       required: [true, "Please enter your username"],
       trim: true,
       unique: true,
+      select: false
     },
     password: {
       type: String,
@@ -34,6 +35,11 @@ const userSchema = new mongoose.Schema(
       minlength: [6, "Your password must be at least 6 characters long"],
       select: false,
     },
+    passwordIsChanged: {
+      type: Boolean,
+      default: false,
+      select: false
+    }
   },
   {
     timestamps: true,
@@ -50,6 +56,13 @@ userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   // hash the password with cost of 12
   this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+userSchema.pre('updateOne', async function (next) {
+  // only run this function if password was actually modified
+  if (!this._update.password) return next();
+  // hash the password with cost of 12
+  this._update.password = await bcrypt.hash(this._update.password, 12);
   next();
 });
 

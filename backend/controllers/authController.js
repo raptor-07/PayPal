@@ -14,6 +14,7 @@ const tokenVerifier = (req, res, next) => {
       });
     }
     if (decoded) {
+      res.locals.user = decoded;
       next();
     }
   });
@@ -62,6 +63,7 @@ const login = (req, res) => {
           });
         }
         if (result) {
+          user.password = undefined;
           const token = tokenSigner(user);
           createCookie(res, token);
           res.status(200).json({
@@ -88,7 +90,23 @@ const forgotPassword = (req, res) => {
   res.send("forgotPassword");
 };
 const resetPassword = (req, res) => {
-  res.send("resetPassword");
+  User.updateOne(
+    { email: res.locals.user.email },
+    { password: req.body.newpassword, passwordIsChanged: true }
+  )
+    .then((result) => {
+      res.status(200).json({
+        status: "success",
+        message: "password changed successfully"
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        status: "fail",
+        message: "Something went wrong",
+        err: err,
+      });
+    });
 };
 const updateEmail = (req, res) => {
   res.send("updateEmail");
