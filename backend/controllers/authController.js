@@ -93,6 +93,18 @@ const forgotPassword = (req, res) => {
   res.send("forgotPassword");
 };
 const resetPassword = (req, res) => {
+  if(req.body.newpassword !== req.body.confirmpassword){
+    res.status(400).json({
+      status: "fail",
+      message: "passwords do not match",
+    });
+  }
+  if(!req.body.newpassword){
+    res.status(400).json({
+      status: "fail",
+      message: "please provide new password",
+    });
+  }
   User.updateOne(
     { email: res.locals.user.email },
     { password: req.body.newpassword, passwordIsChanged: true }
