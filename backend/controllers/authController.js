@@ -37,7 +37,51 @@ const signup = async (req, res) => {
 };
 
 const login = (req, res) => {
-  
+  const { email, password } = req.body;
+  if (!email || !password) {
+    res.status(400).json({
+      status: "fail",
+      message: "Please provide email and password",
+    });
+  }
+  User.findOne({ email })
+    .select("+password +email +username")
+    .lean()
+    .then((user) => {
+      console.log(user);
+
+      if (!user) {
+        res.status(401).json({
+          status: "fail",
+          message: "Incorrect email or password",
+        });
+      }
+      bcryptjs.compare(password, user.password, (err, result) => {
+        if (err) {
+          res.status(401).json({
+            status: "fail",
+            message: "Incorrect email or password",
+          });
+        }
+        if (result) {
+          const token = tokenSigner(user);
+          createCookie(res, token);
+          res.status(200).json({
+            status: "success",
+            data: {
+              user,
+            },
+          });
+        }
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        status: "fail",
+        message: "Something went wrong",
+        err: err,
+      });
+    });
 };
 const logout = (req, res) => {
   res.send("logout");
