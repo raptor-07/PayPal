@@ -47,8 +47,6 @@ const login = (req, res) => {
     .select("+password +email +username")
     .lean()
     .then((user) => {
-      console.log(user);
-
       if (!user) {
         res.status(401).json({
           status: "fail",
@@ -71,6 +69,11 @@ const login = (req, res) => {
             data: {
               user,
             },
+          });
+        }else{
+          res.status(401).json({
+            status: "fail",
+            message: "Incorrect email or password",
           });
         }
       });
@@ -97,7 +100,7 @@ const resetPassword = (req, res) => {
     .then((result) => {
       res.status(200).json({
         status: "success",
-        message: "password changed successfully"
+        message: "password changed successfully",
       });
     })
     .catch((err) => {
@@ -109,7 +112,20 @@ const resetPassword = (req, res) => {
     });
 };
 const updateEmail = (req, res) => {
-  res.send("updateEmail");
+  User.updateOne({ email: res.locals.user.newemail }, { email: req.body.newemail })
+    .then((result) => {
+      res.status(200).json({
+        status: "success",
+        message: "email changed successfully",
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        status: "fail",
+        message: "Something went wrong",
+        err: err,
+      });
+    });
 };
 
 module.exports = {
