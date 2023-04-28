@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema(
 //DB middleware
 userSchema.pre(/^find/, function (next) {
   // exclude password and __v fields from all find queries
-  this.select("-password -__v -createdAt -updatedAt -_id -email -username");
+  this.select("-__v -createdAt -updatedAt -_id");
   next();
 });
 userSchema.pre('save', async function (next) {
