@@ -3,6 +3,7 @@ const createCookie = require("../utils/createCookie");
 const jwt = require("jsonwebtoken");
 require("dotenv").config({ path: "../config.env" });
 const bcryptjs = require("bcryptjs");
+const nodeMailer = require("nodemailer");
 
 //authentication middlewares
 const tokenVerifier = (req, res, next) => {
@@ -70,7 +71,7 @@ const login = (req, res) => {
               user,
             },
           });
-        }else{
+        } else {
           res.status(401).json({
             status: "fail",
             message: "Incorrect email or password",
@@ -90,16 +91,70 @@ const logout = (req, res) => {
   res.send("logout");
 };
 const forgotPassword = (req, res) => {
-  res.send("forgotPassword");
+  const { email } = req.body;
+  User.findOne({ email })
+    .select("+password +email +username")
+    .lean()
+    .then((user) => {
+      if (!user) {
+        res.status(404).json({
+          status: "fail",
+          message: "User not found",
+        });
+      } else {
+        //connection to smpt server
+        const transporter = nodeMailer.createTransport({
+          service: "gmail",
+          auth: {
+            user: process.env.EMAIL,
+            pass: process.env.EMAILPASSWORD,
+          },
+          tls: {
+            rejectUnauthorized: false,
+          },
+        });
+        //generate new jwt
+        const token = tokenSigner({ email: req.body.email });
+        //send email
+        const mailOptions = {
+          from: process.env.EMAIL,
+          to: req.body.email,
+          subject: "Reset Password",
+          html: `<h1>Click on the link below to reset your password</h1>
+          <a href="http://${process.env.DOMAIN}/resetpassword/${token}">Reset Password</a>`,
+        };
+        transporter.sendMail(mailOptions, (err, info) => {
+          if (err) {
+            res.status(500).json({
+              status: "fail",
+              message: "Something went wrong",
+              err: err,
+            });
+          } else {
+            res.status(200).json({
+              status: "success",
+              message: "email sent successfully",
+            });
+          }
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({
+        status: "fail",
+        message: "Something went wrong",
+        err: err,
+      });
+    });
 };
 const resetPassword = (req, res) => {
-  if(req.body.newpassword !== req.body.confirmpassword){
+  if (req.body.newpassword !== req.body.confirmpassword) {
     res.status(400).json({
       status: "fail",
       message: "passwords do not match",
     });
   }
-  if(!req.body.newpassword){
+  if (!req.body.newpassword) {
     res.status(400).json({
       status: "fail",
       message: "please provide new password",
@@ -124,7 +179,6 @@ const resetPassword = (req, res) => {
     });
 };
 const updateEmail = (req, res) => {
-  
   User.updateOne({ email: res.locals.user.email }, { email: req.body.newemail })
     .then((result) => {
       res.status(200).json({
