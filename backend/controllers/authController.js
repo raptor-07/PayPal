@@ -26,8 +26,6 @@ const tokenSigner = (payload) => {
 const signup = async (req, res) => {
   const newUser = await new User(req.body).save();
   const data = await User.findById(newUser.id).lean();
-  const token = tokenSigner(data);
-  createCookie(res, token);
   res.status(201).json({
     status: "success",
     data: {
