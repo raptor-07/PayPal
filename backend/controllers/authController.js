@@ -112,7 +112,8 @@ const resetPassword = (req, res) => {
     });
 };
 const updateEmail = (req, res) => {
-  User.updateOne({ email: res.locals.user.newemail }, { email: req.body.newemail })
+  
+  User.updateOne({ email: res.locals.user.email }, { email: req.body.newemail })
     .then((result) => {
       res.status(200).json({
         status: "success",
